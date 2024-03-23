@@ -1,0 +1,64 @@
+# IDE-related files
+*.iml
+.idea/
+.vscode/
+
+# Flutter/Dart related files
+**/ios/Flutter/**.symlink
+**.metadata
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+/build/
+.packages
+
+# Firebase related files
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+macos/Runner/GoogleService-Info.plist
+ios/GoogleService-Info.plist
+macos/GoogleService-Info.plist
+
+# Build and generated files
+*.log
+*.log.*
+*.stackdump
+.DS_Store
+ios/Flutter/.last_build_id
+android/key.properties
+*.gradle
+**/build/
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework/
+**/ios/Flutter/Flutter.framework/
+**/ios/Flutter/flutter_export_environment.sh
+
+# Android specific files
+**/android/key.properties
+**/android/app/key.properties
+**/android/.gradle
+**/android/app/build/
+**/android/gradle.properties
+**/android/local.properties
+**/android/gradlew
+**/android/gradlew.bat
+
+# iOS specific files
+**/ios/Pods/
+**/ios/Podfile.lock
+**/ios/Podfile
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework/
+**/ios/Flutter/App.framework/
+**/ios/Flutter/flutter_export_environment.sh
+
+# Firebase authentication
+firebase/
+firebase.log
+
+# Miscellaneous
+*.swp
+
+#DotEnv
+*.env
