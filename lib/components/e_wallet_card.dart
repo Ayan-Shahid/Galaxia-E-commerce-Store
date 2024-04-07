@@ -178,8 +178,9 @@ class EWalletCardState extends State<EWalletCard> {
                               EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           foregroundColor: primary[900]),
                       onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const TopUpEWallet()));
+                        Navigator.of(context, rootNavigator: true).push(
+                            MaterialPageRoute(
+                                builder: (context) => const TopUpEWallet()));
                       },
                       child: Row(
                         children: [

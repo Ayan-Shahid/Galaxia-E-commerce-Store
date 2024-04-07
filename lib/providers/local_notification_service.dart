@@ -3,8 +3,12 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 class LocalNotificationService {
   final FlutterLocalNotificationsPlugin plugin =
       FlutterLocalNotificationsPlugin();
-
   Future<void> init() async {
+    plugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()!
+        .requestNotificationsPermission();
+
     AndroidInitializationSettings androidInitializationSettings =
         const AndroidInitializationSettings("logo");
 

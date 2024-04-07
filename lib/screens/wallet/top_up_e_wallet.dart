@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:galaxia/screens/wallet/confirm_top_up.dart';
+
 import 'package:galaxia/screens/wallet/select_top_up_method.dart';
 import 'package:galaxia/theme/theme.dart';
 

@@ -10,7 +10,6 @@ import 'package:galaxia/components/choose_payment_method_card.dart';
 import 'package:galaxia/screens/add_new_bank_card.dart';
 import 'package:galaxia/screens/auth/register.dart';
 import 'package:galaxia/screens/wallet/confirm_top_up.dart';
-import 'package:galaxia/screens/wallet/top_up_e_wallet.dart';
 
 import 'package:galaxia/store/app_state.dart';
 import 'package:galaxia/theme/theme.dart';
