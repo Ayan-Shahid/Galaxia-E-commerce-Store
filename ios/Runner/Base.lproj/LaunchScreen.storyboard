@@ -20,7 +20,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="YRO-k0-Ey4">
-                                <rect key="frame" x="215" y="466" width="0.33333333333334281" height="0.33333333333331439"/>
+                                <rect key="frame" x="115" y="366" width="200" height="200"/>
                                 <color key="backgroundColor" red="0.031372549020000001" green="0.035294117649999998" blue="0.050980392159999999" alpha="1" colorSpace="calibratedRGB"/>
                                 <color key="tintColor" red="0.031372549020000001" green="0.035294117649999998" blue="0.050980392159999999" alpha="1" colorSpace="calibratedRGB"/>
                             </imageView>
@@ -37,7 +37,8 @@
             <point key="canvasLocation" x="80.916030534351137" y="264.08450704225356"/>
         </scene>
     </scenes>
+    <color key="tintColor" red="0.031372549020000001" green="0.035294117649999998" blue="0.050980392159999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
     <resources>
-        <image name="LaunchImage" width="0.3333333432674408" height="0.3333333432674408"/>
+        <image name="LaunchImage" width="200" height="200"/>
     </resources>
 </document>

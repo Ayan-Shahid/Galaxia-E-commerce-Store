@@ -4,6 +4,8 @@ import 'package:galaxia/screens/profile/add_new_address.dart';
 import 'package:galaxia/screens/profile/address.dart';
 import 'package:galaxia/screens/profile/home.dart';
 import 'package:galaxia/screens/profile/payment.dart';
+import 'package:galaxia/screens/profile/security.dart';
+import 'package:galaxia/screens/security/verify_pin.dart';
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
@@ -13,6 +15,8 @@ class Profile extends StatelessWidget {
       "/payment": (context) => const Payment(),
       "/address": (context) => const Address(),
       "/add new address": (context) => const AddNewAddress(),
+      '/security': (context) => const Security(),
+      '/verify pin': (context) => const VerifyPin()
     };
   }
 

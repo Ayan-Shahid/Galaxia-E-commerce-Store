@@ -29,7 +29,8 @@ PaymentMethodsState paymentMethodsReducer(
     list.remove(action.payload);
 
     return PaymentMethodsState(items: list);
+  } else if (action.type == PaymentMethodsStateActions.clear) {
+    return const PaymentMethodsState(items: []);
   }
-
   return state;
 }

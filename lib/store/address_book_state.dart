@@ -29,7 +29,7 @@ class AddressBookState {
   const AddressBookState({this.items = const []});
 }
 
-enum AddressBookStateActions { add, remove }
+enum AddressBookStateActions { add, remove, clear }
 
 class AddressBookStateAction {
   AddressBookStateActions? type;

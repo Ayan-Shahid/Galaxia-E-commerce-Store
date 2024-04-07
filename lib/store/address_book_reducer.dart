@@ -8,6 +8,9 @@ AddressBookState addressBookReducer(AddressBookState state, dynamic action) {
     List<AddressBookItem> newList = List.from(state.items)
       ..remove(action.payload);
     return AddressBookState(items: newList);
+  } else if (action.type == AddressBookStateActions.clear) {
+    return const AddressBookState(items: []);
   }
+
   return state;
 }

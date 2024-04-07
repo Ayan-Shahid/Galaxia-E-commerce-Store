@@ -105,7 +105,6 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/illustrations/
-    - assets/rive/
     - assets/glass icons/
     - assets/flags/
     - assets/.env

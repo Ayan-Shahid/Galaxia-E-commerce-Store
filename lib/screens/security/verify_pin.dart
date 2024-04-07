@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:galaxia/components/authenticate_form_button.dart';
 
 import 'package:galaxia/main.dart';
+
 import 'package:galaxia/screens/auth/create_new_password.dart';
 import 'package:galaxia/screens/auth/register.dart';
 import 'package:galaxia/store/app_state.dart';
@@ -22,35 +24,42 @@ class VerifyPin extends StatefulWidget {
 
 class VerifyPinState extends State<VerifyPin> {
   final List<FocusNode> focusNodes = List.generate(4, (index) => FocusNode());
-
+  bool pinError = false;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   FirebaseAuth auth = FirebaseAuth.instance;
   FormStates buttonState = FormStates.Default;
+  FormStates newbuttonState = FormStates.Default;
+
   final List<TextEditingController> controllers =
       List.generate(4, (index) => TextEditingController());
   navigateToChangePassword() {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => CreateNewPassword(
-              buttonState: buttonState,
+              buttonState: newbuttonState,
               onSubmit: (password) => changePassword(password),
             )));
   }
 
   goBack() {
     Navigator.of(context).pop();
+    Navigator.of(context).pop();
   }
 
   changePassword(String password) async {
     try {
-      print("what");
       setState(() {
-        buttonState = FormStates.Validating;
+        newbuttonState = FormStates.Validating;
       });
       await auth.currentUser?.updatePassword(password);
       setState(() {
-        buttonState = FormStates.Success;
+        newbuttonState = FormStates.Success;
       });
       Future.delayed(const Duration(seconds: 2), () {
+        setState(() {
+          newbuttonState = FormStates.Success;
+        });
+      });
+      Future.delayed(const Duration(seconds: 3), () {
         goBack();
       });
     } catch (e) {
@@ -59,19 +68,22 @@ class VerifyPinState extends State<VerifyPin> {
       setState(() {
         buttonState = FormStates.Error;
       });
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          setState(() {
+            newbuttonState = FormStates.Default;
+          });
+        }
+      });
     }
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() {
-          buttonState = FormStates.Default;
-        });
-      }
-    });
   }
 
   submit() async {
     String pin =
         '${controllers[0].text}${controllers[1].text}${controllers[2].text}${controllers[3].text}';
+    setState(() {
+      buttonState = FormStates.Validating;
+    });
     try {
       final PIN =
           await galaxiaStorage.read(key: "${auth.currentUser?.uid} PIN");
@@ -81,15 +93,48 @@ class VerifyPinState extends State<VerifyPin> {
         final password =
             await galaxiaStorage.read(key: "${auth.currentUser?.uid} Password");
 
-        await auth.currentUser
-            ?.reauthenticateWithCredential(EmailAuthProvider.credential(
-                email: email!, password: password!))
-            .then((value) => print("hello"));
+        await auth.currentUser?.reauthenticateWithCredential(
+            EmailAuthProvider.credential(email: email!, password: password!));
 
         await navigateToChangePassword();
+        setState(() {
+          buttonState = FormStates.Success;
+        });
+        Future.delayed(Duration(seconds: 2), () {
+          if (mounted) {
+            setState(() {
+              buttonState = FormStates.Default;
+            });
+          }
+        });
+      } else {
+        for (TextEditingController element in controllers) {
+          element.clear();
+        }
+        focusNodes[0].requestFocus();
+        setState(() {
+          pinError = true;
+          buttonState = FormStates.Error;
+        });
+        Future.delayed(Duration(seconds: 2), () {
+          setState(() {
+            pinError = false;
+            buttonState = FormStates.Default;
+          });
+        });
       }
     } catch (error) {
       print(error);
+      setState(() {
+        buttonState = FormStates.Error;
+      });
+      Future.delayed(Duration(seconds: 2), () {
+        if (mounted) {
+          setState(() {
+            buttonState = FormStates.Default;
+          });
+        }
+      });
     }
   }
 
@@ -187,21 +232,22 @@ class VerifyPinState extends State<VerifyPin> {
                       ),
                     ),
                   ),
+                  const SizedBox(
+                    height: 24,
+                  ),
+                  Visibility(
+                    visible: pinError,
+                    child: Text(
+                      "Invalid PIN Try Again!",
+                      style:
+                          TextStyle(fontSize: width * 0.036, color: error[500]),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
                 ],
               )),
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      fixedSize: Size(width, width * 0.14)),
-                  onPressed: () {
-                    submit();
-                  },
-                  child: Text(
-                    "Continue",
-                    style: TextStyle(
-                        color: primary[900],
-                        fontWeight: FontWeight.bold,
-                        fontSize: width * 0.036),
-                  ))
+              AuthenticateFormButton(
+                  formState: buttonState, title: "Continue", onSubmit: submit)
             ],
           ),
         )),

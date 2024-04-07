@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:galaxia/components/avatar_picker.dart';
 import 'package:galaxia/components/profile_list_button.dart';
-import 'package:galaxia/main.dart';
 
 import 'package:galaxia/screens/profile/address.dart';
 import 'package:galaxia/screens/profile/confirm_delete_account.dart';
@@ -27,53 +26,12 @@ class Home extends StatefulWidget {
 class HomeState extends State<Home> {
   FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  Reference storageReference = FirebaseStorage.instance.ref();
   FirebaseFunctions functions = FirebaseFunctions.instance;
+  Reference storageReference = FirebaseStorage.instance.ref();
 
   confirmDeletion() {
-    Navigator.of(context)
+    Navigator.of(context, rootNavigator: true)
         .push(MaterialPageRoute(builder: (context) => ConfirmDeleteAccount()));
-  }
-
-  deleteAccount() async {
-    try {
-      WriteBatch batch = firestore.batch(); // Initialize a batch
-
-      String stripeId = await firestore
-          .collection("Users")
-          .doc(auth.currentUser?.uid)
-          .get()
-          .then((value) => value.get("Stripe ID"));
-
-      await functions
-          .httpsCallable("deleteStripeCustomer")
-          .call({"id": stripeId});
-      await firestore.collection("Users").doc(auth.currentUser?.uid).delete();
-      QuerySnapshot address = await firestore.collection("Address's").get();
-
-      for (QueryDocumentSnapshot element in address.docs) {
-        if (element.get("ID") == auth.currentUser?.uid) {
-          batch.delete(firestore.collection("Address's").doc(element.id));
-        }
-      }
-
-      QuerySnapshot order = await firestore.collection("Orders").get();
-
-      for (QueryDocumentSnapshot element in order.docs) {
-        if (element.get("User ID") == auth.currentUser?.uid) {
-          batch.delete(firestore.collection("Orders").doc(element.id));
-        }
-      }
-      await batch.commit();
-
-      storageReference.child('${auth.currentUser!.uid}/').delete();
-      await galaxiaStorage.delete(key: "${auth.currentUser?.uid} Email");
-      await galaxiaStorage.delete(key: "${auth.currentUser?.uid} Password");
-
-      confirmDeletion();
-    } catch (e) {
-      print(e);
-    }
   }
 
   updatePhoto(File? file) async {
@@ -286,7 +244,7 @@ class HomeState extends State<Home> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 4),
                       foregroundColor: error[300]),
-                  onPressed: deleteAccount,
+                  onPressed: confirmDeletion,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

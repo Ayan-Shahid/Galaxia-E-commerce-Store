@@ -24,7 +24,7 @@ class PaymentMethodsState {
   const PaymentMethodsState({this.items = const []});
 }
 
-enum PaymentMethodsStateActions { add, remove }
+enum PaymentMethodsStateActions { add, remove, clear }
 
 class PaymentMethodsStateAction {
   PaymentMethodsStateActions? type;

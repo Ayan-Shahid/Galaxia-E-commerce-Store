@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:galaxia/components/authenticate_form_button.dart';
 
 import 'package:galaxia/main.dart';
 
@@ -22,6 +25,9 @@ class ConfirmDeleteAccount extends StatefulWidget {
 
 class ConfirmDeleteAccountState extends State<ConfirmDeleteAccount> {
   final List<FocusNode> focusNodes = List.generate(4, (index) => FocusNode());
+  final FirebaseFunctions functions = FirebaseFunctions.instance;
+  Reference storageReference = FirebaseStorage.instance.ref();
+  bool pinError = false;
 
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   FirebaseAuth auth = FirebaseAuth.instance;
@@ -33,27 +39,173 @@ class ConfirmDeleteAccountState extends State<ConfirmDeleteAccount> {
     Navigator.of(context).pop();
   }
 
+  deleteAccount() async {
+    String stripeId = await firestore
+        .collection("Users")
+        .doc(auth.currentUser?.uid)
+        .get()
+        .then((value) => value.get("Stripe ID"));
+    QuerySnapshot address = await firestore
+        .collection("Address's")
+        .where("ID", isEqualTo: auth.currentUser?.uid)
+        .get();
+    QuerySnapshot reviews = await firestore
+        .collection("Review")
+        .where("User ID", isEqualTo: auth.currentUser?.uid)
+        .get();
+    QuerySnapshot orders = await firestore
+        .collection("Order")
+        .where("User ID", isEqualTo: auth.currentUser?.uid)
+        .get();
+    List<DocumentSnapshot> ordersub = [];
+
+    for (DocumentSnapshot element in orders.docs) {
+      QuerySnapshot list = await firestore
+          .collection("Order")
+          .doc(element.id)
+          .collection("Item")
+          .get();
+      ordersub.addAll(list.docs);
+    }
+
+    QuerySnapshot wishlist = await firestore
+        .collection("Wish List")
+        .doc(auth.currentUser?.uid)
+        .collection("Item")
+        .get();
+    QuerySnapshot wallet = await firestore
+        .collection("E-Wallet")
+        .doc(auth.currentUser?.uid)
+        .collection("Transaction")
+        .get();
+    QuerySnapshot cart = await firestore
+        .collection("Cart")
+        .doc(auth.currentUser?.uid)
+        .collection("Item")
+        .get();
+    await firestore.runTransaction((transaction) async {
+      for (QueryDocumentSnapshot element in address.docs) {
+        transaction.delete(firestore.collection("Address's").doc(element.id));
+      }
+      for (QueryDocumentSnapshot element in reviews.docs) {
+        transaction.delete(firestore.collection("Review").doc(element.id));
+      }
+      for (QueryDocumentSnapshot element in orders.docs) {
+        for (DocumentSnapshot subelement in ordersub) {
+          transaction.delete(firestore
+              .collection("Order")
+              .doc(element.id)
+              .collection("Item")
+              .doc(subelement.id));
+        }
+        transaction.delete(firestore.collection("Order").doc(element.id));
+      }
+      for (DocumentSnapshot element in wishlist.docs) {
+        transaction.delete(firestore
+            .collection("Wish List")
+            .doc(auth.currentUser?.uid)
+            .collection("Item")
+            .doc(element.id));
+      }
+      for (DocumentSnapshot element in wallet.docs) {
+        transaction.delete(firestore
+            .collection("E-Wallet")
+            .doc(auth.currentUser?.uid)
+            .collection("Transaction")
+            .doc(element.id));
+      }
+      for (DocumentSnapshot element in cart.docs) {
+        transaction.delete(firestore
+            .collection("Cart")
+            .doc(auth.currentUser?.uid)
+            .collection("Item")
+            .doc(element.id));
+      }
+      transaction
+          .delete(firestore.collection("Wish List").doc(auth.currentUser?.uid));
+      transaction
+          .delete(firestore.collection("E-Wallet").doc(auth.currentUser?.uid));
+      transaction
+          .delete(firestore.collection("Cart").doc(auth.currentUser?.uid));
+      transaction
+          .delete(firestore.collection("Users").doc(auth.currentUser?.uid));
+    });
+    await storageReference.child('${auth.currentUser!.uid}/').delete();
+
+    await functions
+        .httpsCallable("deleteStripeCustomer")
+        .call({"id": stripeId});
+  }
+
   submit() async {
     String pin =
         '${controllers[0].text}${controllers[1].text}${controllers[2].text}${controllers[3].text}';
     try {
-      final PIN = await galaxiaStorage.read(key: "PIN");
+      setState(() {
+        buttonState = FormStates.Validating;
+      });
+      final PIN =
+          await galaxiaStorage.read(key: "${auth.currentUser?.uid} PIN");
       if (pin == PIN) {
-        final email =
-            await galaxiaStorage.read(key: "${auth.currentUser?.uid} Email");
-        final password =
-            await galaxiaStorage.read(key: "${auth.currentUser?.uid} Password");
+        if (auth.currentUser?.providerData.first.providerId ==
+            GoogleAuthProvider().providerId) {
+          await auth.currentUser
+              ?.reauthenticateWithProvider(GoogleAuthProvider());
+        } else {
+          final email =
+              await galaxiaStorage.read(key: "${auth.currentUser?.uid} Email");
+          final password = await galaxiaStorage.read(
+              key: "${auth.currentUser?.uid} Password");
 
-        await auth.currentUser?.reauthenticateWithCredential(
-            EmailAuthProvider.credential(email: email!, password: password!));
+          await auth.currentUser?.reauthenticateWithCredential(
+              EmailAuthProvider.credential(email: email!, password: password!));
+        }
+        await deleteAccount();
+        await galaxiaStorage.delete(key: "${auth.currentUser?.uid} PIN");
+        await galaxiaStorage.delete(key: "${auth.currentUser?.uid} Email");
 
-        await auth.currentUser?.delete();
-        await auth.signOut();
+        await galaxiaStorage.delete(key: "${auth.currentUser?.uid} Password");
 
-        goBack();
+        setState(() {
+          buttonState = FormStates.Success;
+        });
+        Future.delayed(Duration(seconds: 2), () {
+          setState(() {
+            buttonState = FormStates.Default;
+          });
+        });
+
+        Future.delayed(Duration(seconds: 3), () async {
+          await auth.currentUser?.delete();
+
+          await auth.signOut();
+          goBack();
+        });
+      } else {
+        setState(() {
+          buttonState = FormStates.Error;
+          pinError = true;
+        });
+        Future.delayed(Duration(seconds: 2), () {
+          setState(() {
+            buttonState = FormStates.Default;
+            pinError = false;
+          });
+        });
       }
     } catch (error) {
       print(error);
+
+      setState(() {
+        buttonState = FormStates.Error;
+        pinError = true;
+      });
+      Future.delayed(Duration(seconds: 2), () {
+        setState(() {
+          buttonState = FormStates.Default;
+          pinError = false;
+        });
+      });
     }
   }
 
@@ -151,21 +303,22 @@ class ConfirmDeleteAccountState extends State<ConfirmDeleteAccount> {
                       ),
                     ),
                   ),
+                  const SizedBox(
+                    height: 24,
+                  ),
+                  Visibility(
+                    visible: pinError,
+                    child: Text(
+                      "Invalid PIN Try Again!",
+                      style:
+                          TextStyle(fontSize: width * 0.036, color: error[500]),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
                 ],
               )),
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      fixedSize: Size(width, width * 0.14)),
-                  onPressed: () {
-                    submit();
-                  },
-                  child: Text(
-                    "Continue",
-                    style: TextStyle(
-                        color: primary[900],
-                        fontWeight: FontWeight.bold,
-                        fontSize: width * 0.036),
-                  ))
+              AuthenticateFormButton(
+                  formState: buttonState, title: "Continue", onSubmit: submit)
             ],
           ),
         )),

@@ -62,3 +62,5 @@ firebase.log
 
 #DotEnv
 *.env
+
+./lib/firebase_options.dart

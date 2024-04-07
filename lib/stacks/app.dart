@@ -15,7 +15,6 @@ import 'package:galaxia/store/address_book_state.dart';
 import 'package:galaxia/store/galaxia_store.dart';
 
 import 'package:galaxia/store/payment_methods_state.dart';
-import 'package:galaxia/store/wishlist_state.dart';
 
 import 'package:galaxia/views/home.dart';
 import 'package:galaxia/views/orders.dart';
@@ -60,11 +59,15 @@ class AppState extends State<App> {
     getAddressBook();
 
     getPaymentMethods();
-    getWishList();
+
     getUserAuthStatus();
   }
 
   getPaymentMethods() async {
+    galaxiaStore.dispatch((Store<app_state.AppState> store) {
+      store.dispatch(
+          PaymentMethodsStateAction(type: PaymentMethodsStateActions.clear));
+    });
     try {
       bool exists = await firestore
           .collection("Users")
@@ -133,29 +136,11 @@ class AppState extends State<App> {
     }
   }
 
-  getWishList() async {
-    try {
-      QuerySnapshot data = await firestore
-          .collection("Wish List")
-          .where("User ID", isEqualTo: auth.currentUser?.uid)
-          .get();
-
-      for (DocumentSnapshot document in data.docs) {
-        galaxiaStore.dispatch((Store<app_state.AppState> store) {
-          store.dispatch(WishListStateAction(
-              type: WishListStateActions.add,
-              payload: WishListItem(
-                  uid: document.id,
-                  userId: document.get("User ID"),
-                  productId: document.get("Product ID"))));
-        });
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
-
   getAddressBook() async {
+    galaxiaStore.dispatch((Store<app_state.AppState> store) {
+      store.dispatch(
+          AddressBookStateAction(type: AddressBookStateActions.clear));
+    });
     try {
       QuerySnapshot inventory = await firestore
           .collection("Address's")
