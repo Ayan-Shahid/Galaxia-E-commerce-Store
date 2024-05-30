@@ -1,19 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:galaxia/components/google_signin_cancelled_popup.dart';
-import 'package:galaxia/components/google_signin_network_error_popup.dart';
 
-import 'package:galaxia/providers/profile_setup_provider.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:galaxia/components/google_signin_button.dart';
+
 import 'package:galaxia/screens/auth/login.dart';
-import 'package:galaxia/screens/auth/profile_setup.dart';
+
 import 'package:galaxia/screens/auth/register.dart';
 import 'package:galaxia/theme/theme.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:provider/provider.dart';
 
 class GetStarted extends StatefulWidget {
   const GetStarted({Key? key}) : super(key: key);
@@ -23,85 +16,6 @@ class GetStarted extends StatefulWidget {
 }
 
 class GetStartedState extends State<GetStarted> {
-  final GoogleSignIn googleSignIn = GoogleSignIn();
-  final FirebaseAuth auth = FirebaseAuth.instance;
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  final GlobalKey<GetStartedState> buildcontext = GlobalKey();
-
-  setProfileState() {
-    Provider.of<ProfileSetupProvider>(context, listen: false)
-        .setProfileSetup(false);
-  }
-
-  navigateToSetUpProfile() {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => const ProfileSetUp(),
-    ));
-  }
-
-  _signInWithGoogle() async {
-    try {
-      // Trigger the Google Sign In process
-      final GoogleSignInAccount? googleSignInAccount =
-          await googleSignIn.signIn();
-
-      if (googleSignInAccount == null) {
-        throw PlatformException(code: GoogleSignIn.kSignInCanceledError);
-      }
-
-      // Get GoogleSignInAuthentication object
-      final GoogleSignInAuthentication googleSignInAuthentication =
-          await googleSignInAccount.authentication;
-
-      // Create GoogleAuthCredential using the GoogleSignInAuthentication object
-      final OAuthCredential googleAuthCredential =
-          GoogleAuthProvider.credential(
-        accessToken: googleSignInAuthentication.accessToken,
-        idToken: googleSignInAuthentication.idToken,
-      );
-
-      // Sign in with Google Auth credentials
-      final UserCredential authResult =
-          await auth.signInWithCredential(googleAuthCredential);
-
-      authResult.user?.updateDisplayName(
-          authResult.user?.email?.replaceAll("@gmail.com", ""));
-
-      bool hasPreviouslySignedIn = await firestore
-          .collection("Users")
-          .doc(authResult.user?.uid)
-          .get()
-          .then((value) => value.exists);
-
-      if (!hasPreviouslySignedIn) {
-        setProfileState();
-        navigateToSetUpProfile();
-      }
-
-      // Return the user after a successful sign-in
-    } catch (error) {
-      if (error is PlatformException) {
-        if (error.code == GoogleSignIn.kSignInCanceledError) {
-          if (buildcontext.currentContext != null) {
-            showCupertinoModalPopup(
-                context: buildcontext.currentContext!,
-                builder: (BuildContext popup) {
-                  return const GoogleSignInCancelledPopUp();
-                });
-          }
-        } else if (error.code == GoogleSignIn.kNetworkError) {
-          if (buildcontext.currentContext != null) {
-            showCupertinoModalPopup(
-                context: buildcontext.currentContext!,
-                builder: (BuildContext popup) {
-                  return const GoogleSignInNetworkErrorPopUp();
-                });
-          }
-        }
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -178,32 +92,11 @@ class GetStartedState extends State<GetStarted> {
             const SizedBox(
               height: 24,
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                      foregroundColor: grayscale[400],
-                      side: BorderSide(color: grayscale[200] ?? Colors.black),
-                      padding: const EdgeInsets.symmetric(vertical: 20)),
-                  onPressed: () {
-                    _signInWithGoogle();
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset("assets/icons/Google.svg"),
-                      const SizedBox(
-                        width: 12,
-                      ),
-                      Text("Continue With Google",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: grayscale[1000],
-                            fontSize: width * 0.032,
-                          ))
-                    ],
-                  )),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: SignInWithGoogleButton(
+                type: GoogleSignInButtonType.normal,
+              ),
             ),
             const SizedBox(
               height: 24,

@@ -61,6 +61,18 @@ Map<int, Color> warning = {
   900: const Color(0xffFEFBEB)
 };
 
+Map<int, Color> secondary = {
+  100: const Color(0xff0b0722),
+  200: const Color(0xff150d45),
+  300: const Color(0xff251778),
+  400: const Color(0xff3521ab),
+  500: const Color(0xff4a31d8),
+  600: const Color(0xff7865e2),
+  700: const Color(0xffa598eb),
+  800: const Color(0xffc3baf2),
+  900: const Color(0xfff0eefc),
+};
+
 ThemeData darkTheme = ThemeData(
     brightness: Brightness.dark,
     switchTheme: SwitchThemeData(

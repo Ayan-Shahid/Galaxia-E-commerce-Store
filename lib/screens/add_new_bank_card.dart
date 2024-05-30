@@ -55,6 +55,10 @@ class AddNewBankCardState extends State<AddNewBankCard> {
       TextEditingController();
   final TextEditingController cvvInputController = TextEditingController();
 
+  String cardNameText = "Card Name";
+  String cardExpiryDateYearText = "2022";
+  String cardExpiryDateMonthText = "12";
+
   Future<String?> createStripePaymentMethod(
       String number, String expMonth, String expYear, String cvc) async {
     return await Stripe.instance.api.createPaymentMethod({
@@ -154,6 +158,12 @@ class AddNewBankCardState extends State<AddNewBankCard> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     // double height = MediaQuery.of(context).size.height;
@@ -188,7 +198,12 @@ class AddNewBankCardState extends State<AddNewBankCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const BankCard(),
+            BankCard(
+              cardHolderName: auth.currentUser?.displayName ?? "Card Name",
+              cardName: cardNameText,
+              expiryDateMonth: cardExpiryDateMonthText,
+              expiryDateYear: cardExpiryDateYearText,
+            ),
             const SizedBox(
               height: 24,
             ),
@@ -207,6 +222,11 @@ class AddNewBankCardState extends State<AddNewBankCard> {
                     ),
                     TextFormField(
                       controller: cardNameInputController,
+                      onChanged: (value) {
+                        setState(() {
+                          cardNameText = value;
+                        });
+                      },
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -258,6 +278,11 @@ class AddNewBankCardState extends State<AddNewBankCard> {
                             ExpiryMonthInput(
                               controller: expiryMonthInputController,
                               error: expiryMonthErrorString,
+                              onChange: (value) {
+                                setState(() {
+                                  cardExpiryDateMonthText = value;
+                                });
+                              },
                             ),
                           ],
                         )),
@@ -280,6 +305,11 @@ class AddNewBankCardState extends State<AddNewBankCard> {
                             ExpiryYearInput(
                               controller: expiryYearInputController,
                               error: expiryYearErrorString,
+                              onChange: (value) {
+                                setState(() {
+                                  cardExpiryDateYearText = value;
+                                });
+                              },
                             ),
                           ],
                         )),

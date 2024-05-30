@@ -4,6 +4,8 @@ import 'package:galaxia/theme/theme.dart';
 
 class Counter extends StatefulWidget {
   final Function(int)? onChange;
+  final Function(int)? onIncrement;
+  final Function(int)? onDecrement;
   final TextStyle? countStyle;
   final double? iconSize;
   final double? padding;
@@ -12,6 +14,8 @@ class Counter extends StatefulWidget {
   const Counter(
       {super.key,
       this.onChange,
+      this.onDecrement,
+      this.onIncrement,
       this.padding,
       this.value,
       this.countStyle,
@@ -28,6 +32,7 @@ class CounterState extends State<Counter> {
       count += 1;
     });
     widget.onChange!(count);
+    widget.onIncrement!(count);
   }
 
   decrement() {
@@ -36,6 +41,7 @@ class CounterState extends State<Counter> {
       count -= 1;
     });
     widget.onChange!(count);
+    widget.onDecrement!(count);
   }
 
   @override

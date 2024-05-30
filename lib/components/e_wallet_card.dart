@@ -47,11 +47,11 @@ class EWalletCardState extends State<EWalletCard> {
 
     return Container(
       width: MediaQuery.of(context).size.width,
-      height: width * 0.56,
+      height: width * 0.52,
       clipBehavior: Clip.antiAlias,
       decoration: ShapeDecoration(
-        shape: ContinuousRectangleBorder(
-            borderRadius: BorderRadius.circular(108),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
             side: BorderSide(color: grayscale[400]!)),
       ),
       child: Stack(children: [
@@ -65,7 +65,7 @@ class EWalletCardState extends State<EWalletCard> {
                   width: MediaQuery.of(context).size.height * 0.24,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: grayscale[500],
+                    color: secondary[500],
                   ),
                 )),
             Positioned(
@@ -75,7 +75,7 @@ class EWalletCardState extends State<EWalletCard> {
                   width: MediaQuery.of(context).size.height * 0.28,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: grayscale[500],
+                    color: secondary[300],
                   ),
                 )),
             Positioned(
@@ -86,7 +86,7 @@ class EWalletCardState extends State<EWalletCard> {
                   width: MediaQuery.of(context).size.height * 0.2,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: grayscale[500],
+                    color: secondary[400],
                   ),
                 )),
           ],
@@ -95,7 +95,7 @@ class EWalletCardState extends State<EWalletCard> {
             child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 56, sigmaY: 56),
           child: Container(
-            color: grayscale[400]?.withOpacity(0.1),
+            color: secondary[500]?.withOpacity(0.1),
           ),
         )),
         Padding(
@@ -129,13 +129,6 @@ class EWalletCardState extends State<EWalletCard> {
                   ),
                   const Spacer(),
                   SvgPicture.asset(
-                    "assets/icons/Visa.svg",
-                    width: width * 0.14,
-                  ),
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  SvgPicture.asset(
                     "assets/icons/Mastercard.svg",
                     width: width * 0.12,
                   )
@@ -146,6 +139,7 @@ class EWalletCardState extends State<EWalletCard> {
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(
                       child: SingleChildScrollView(

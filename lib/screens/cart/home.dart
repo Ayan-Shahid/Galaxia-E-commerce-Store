@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_svg/svg.dart';
@@ -126,6 +127,18 @@ class Home extends StatelessWidget {
                     .doc(FirebaseAuth.instance.currentUser?.uid)
                     .snapshots(),
                 builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Container(
+                        padding: EdgeInsets.all(24),
+                        child: SizedBox(
+                          width: 32,
+                          height: 32,
+                          child: CircularProgressIndicator(
+                            backgroundColor: grayscale[300],
+                            color: primary[500],
+                          ),
+                        ));
+                  }
                   if (snapshot.hasData && snapshot.data!.exists) {
                     return Container(
                       padding: const EdgeInsets.all(24),

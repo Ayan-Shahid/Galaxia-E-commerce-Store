@@ -4,8 +4,10 @@ import 'package:flutter_svg/svg.dart';
 
 class ExpiryYearInput extends StatelessWidget {
   final TextEditingController controller;
+  final Function(String)? onChange;
   final String? error;
-  const ExpiryYearInput({super.key, required this.controller, this.error});
+  const ExpiryYearInput(
+      {super.key, required this.controller, this.error, this.onChange});
   String? validate(String? value) {
     if (value == null || value.isEmpty) {
       return "Please enter your card expiry year!";
@@ -19,6 +21,7 @@ class ExpiryYearInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      onChanged: onChange,
       validator: validate,
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,

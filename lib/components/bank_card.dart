@@ -5,7 +5,17 @@ import 'package:flutter_svg/svg.dart';
 import 'package:galaxia/theme/theme.dart';
 
 class BankCard extends StatelessWidget {
-  const BankCard({super.key});
+  final String cardHolderName;
+  final String cardName;
+
+  final String expiryDateMonth;
+  final String expiryDateYear;
+  const BankCard(
+      {super.key,
+      required this.cardHolderName,
+      required this.cardName,
+      required this.expiryDateMonth,
+      required this.expiryDateYear});
 
   @override
   Widget build(BuildContext context) {
@@ -15,8 +25,8 @@ class BankCard extends StatelessWidget {
       width: MediaQuery.of(context).size.width,
       clipBehavior: Clip.antiAlias,
       decoration: ShapeDecoration(
-        shape: ContinuousRectangleBorder(
-            borderRadius: BorderRadius.circular(108),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
             side: BorderSide(color: grayscale[400]!)),
       ),
       child: Stack(children: [
@@ -30,7 +40,7 @@ class BankCard extends StatelessWidget {
                   width: MediaQuery.of(context).size.height * 0.24,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: grayscale[500],
+                    color: secondary[500],
                   ),
                 )),
             Positioned(
@@ -40,7 +50,7 @@ class BankCard extends StatelessWidget {
                   width: MediaQuery.of(context).size.height * 0.28,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: grayscale[500],
+                    color: secondary[300],
                   ),
                 )),
             Positioned(
@@ -51,7 +61,7 @@ class BankCard extends StatelessWidget {
                   width: MediaQuery.of(context).size.height * 0.2,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: grayscale[500],
+                    color: secondary[500],
                   ),
                 )),
           ],
@@ -60,7 +70,7 @@ class BankCard extends StatelessWidget {
             child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 56, sigmaY: 56),
           child: Container(
-            color: grayscale[400]?.withOpacity(0.1),
+            color: secondary[200]?.withOpacity(0.1),
           ),
         )),
         Padding(
@@ -73,7 +83,7 @@ class BankCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Card Name",
+                    cardName,
                     style: Theme.of(context)
                         .textTheme
                         .titleLarge
@@ -108,7 +118,7 @@ class BankCard extends StatelessWidget {
                         height: 4,
                       ),
                       Text(
-                        "Ayan Shahid",
+                        cardHolderName,
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: width * 0.024),
@@ -128,7 +138,7 @@ class BankCard extends StatelessWidget {
                         height: 4,
                       ),
                       Text(
-                        "12/4/2022",
+                        "$expiryDateMonth/$expiryDateYear",
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: width * 0.024),

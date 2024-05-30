@@ -289,7 +289,9 @@ class RegisterState extends State<Register> {
                 const SizedBox(
                   width: 32,
                 ),
-                SignInWithGoogleButton(),
+                const SignInWithGoogleButton(
+                  type: GoogleSignInButtonType.icon,
+                ),
                 const SizedBox(
                   width: 32,
                 ),

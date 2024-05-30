@@ -36,8 +36,10 @@ class ExpiryMonthInputFormatter extends TextInputFormatter {
 
 class ExpiryMonthInput extends StatelessWidget {
   final TextEditingController controller;
+  final Function(String)? onChange;
   final String? error;
-  const ExpiryMonthInput({super.key, required this.controller, this.error});
+  const ExpiryMonthInput(
+      {super.key, required this.controller, this.error, this.onChange});
   String? validate(String? value) {
     if (value == null || value.isEmpty) {
       return "Please enter your card expiry month!";
@@ -50,6 +52,7 @@ class ExpiryMonthInput extends StatelessWidget {
     return TextFormField(
       autovalidateMode: AutovalidateMode.onUserInteraction,
       controller: controller,
+      onChanged: onChange,
       validator: validate,
       keyboardType: TextInputType.datetime,
       inputFormatters: [

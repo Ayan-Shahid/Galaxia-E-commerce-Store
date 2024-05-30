@@ -9,7 +9,8 @@ class GoogleSignInNetworkErrorPopUp extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopUp(
         borderRadius: 124,
-        padding: const EdgeInsets.only(top: 32, left: 32, right: 32, bottom: 32),
+        padding:
+            const EdgeInsets.only(top: 32, left: 32, right: 32, bottom: 32),
         content: Column(
           children: [
             SvgPicture.asset(
@@ -25,10 +26,11 @@ class GoogleSignInNetworkErrorPopUp extends StatelessWidget {
                     .titleLarge
                     ?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(
-              height: 24,
+              height: 16,
             ),
             Text(
               "There was a network error. Please check your internet connection and try again!",
+              textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             )
           ],

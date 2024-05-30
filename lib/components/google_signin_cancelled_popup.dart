@@ -20,17 +20,22 @@ class GoogleSignInCancelledPopUp extends StatelessWidget {
             const SizedBox(
               height: 24,
             ),
-            Text("Request Cancelled!",
+            Text("Sign-In Cancelled!",
                 style: Theme.of(context)
                     .textTheme
                     .titleLarge
                     ?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(
-              height: 24,
+              height: 16,
             ),
-            Text(
-              "Google Sign was canclled",
-              style: Theme.of(context).textTheme.bodyMedium,
+            SizedBox(
+              width: 200,
+              child: Text(
+                "You cancelled Google Sign-In. Please try again or contact support.",
+                softWrap: true,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
             )
           ],
         ));

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,37 +12,53 @@ import 'package:galaxia/store/galaxia_product.dart';
 import 'package:galaxia/theme/theme.dart';
 import 'package:galaxia/utilities/hex_to_color.dart';
 
-class CartItem extends StatelessWidget {
+class CartItem extends StatefulWidget {
   final GalaxiaCartProduct item;
 
   const CartItem({super.key, required this.item});
+
+  @override
+  CartItemState createState() => CartItemState();
+}
+
+class CartItemState extends State<CartItem> {
+  Timer? increment_counter_deboune;
+
   updateQuantity(int value) async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     final FirebaseAuth auth = FirebaseAuth.instance;
-    final ref = firestore.collection("Cart").doc(auth.currentUser?.uid);
-    final collection = ref.collection("Item");
-    try {
-      await firestore.runTransaction((transaction) async {
-        final numTotal = await transaction.get(ref);
-        final product = await transaction.get(collection.doc(item.uid));
-        num newSubTotal = numTotal.get("Total");
-        final int currentQuantity = product.get("Quantity");
-
-        if (value > currentQuantity) {
-          newSubTotal += (item.price ?? 0 * (value - currentQuantity));
-        } else {
-          newSubTotal -= (item.price ?? 0 * (currentQuantity - value));
-        }
-
-        transaction.update(collection.doc(item.uid), {"Quantity": value});
-
-        transaction.update(
-            firestore.collection("Cart").doc(auth.currentUser?.uid),
-            {"Total": newSubTotal});
-      });
-    } catch (e) {
-      print(e);
+    if (increment_counter_deboune?.isActive ?? false) {
+      increment_counter_deboune?.cancel();
     }
+    increment_counter_deboune = Timer(Duration(seconds: 2), () async {
+      final ref = firestore.collection("Cart").doc(auth.currentUser?.uid);
+      final collection = ref.collection("Item");
+
+      try {
+        await firestore.runTransaction((transaction) async {
+          final numTotal = await transaction.get(ref);
+          final product =
+              await transaction.get(collection.doc(widget.item.uid));
+          num newSubTotal = numTotal.get("Total");
+          final int currentQuantity = product.get("Quantity");
+
+          if (value > currentQuantity) {
+            newSubTotal += (widget.item.price! * (value - currentQuantity));
+          } else {
+            newSubTotal -= (widget.item.price! * (currentQuantity - value));
+          }
+
+          transaction
+              .update(collection.doc(widget.item.uid), {"Quantity": value});
+
+          transaction.update(
+              firestore.collection("Cart").doc(auth.currentUser?.uid),
+              {"Total": newSubTotal});
+        });
+      } catch (e) {
+        print(e);
+      }
+    });
   }
 
   removeFromCart(BuildContext context) {
@@ -53,7 +71,7 @@ class CartItem extends StatelessWidget {
             .collection("Cart")
             .doc(auth.currentUser?.uid)
             .collection("Item")
-            .doc(item.uid));
+            .doc(widget.item.uid));
 
         final DocumentReference ref =
             firestore.collection("Cart").doc(auth.currentUser?.uid);
@@ -63,7 +81,7 @@ class CartItem extends StatelessWidget {
         } else {
           int count = data.get("Count");
           dynamic total = data.get("Total");
-          total = total - item.price! * item.quantity!;
+          total = total - widget.item.price! * widget.item.quantity!;
           transaction.update(ref, {"Count": count - 1, "Total": total});
         }
       });
@@ -110,7 +128,7 @@ class CartItem extends StatelessWidget {
                       ),
                     )),
                     Positioned.fill(
-                        child: Image.network(item.image!,
+                        child: Image.network(widget.item.image!,
                             fit: BoxFit.cover,
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress != null) {
@@ -153,7 +171,7 @@ class CartItem extends StatelessWidget {
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Text(
-                          "${item.name}",
+                          "${widget.item.name}",
                           style: TextStyle(
                             fontSize: width * 0.034,
                             fontWeight: FontWeight.bold,
@@ -211,7 +229,7 @@ class CartItem extends StatelessWidget {
                                             height: 24,
                                           ),
                                           CheckOutItemCard(
-                                            item: item,
+                                            item: widget.item,
                                           ),
                                           const SizedBox(
                                             height: 24,
@@ -304,13 +322,13 @@ class CartItem extends StatelessWidget {
                       height: width * 0.018,
                       decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: hexToColor(item.color!)),
+                          color: hexToColor(widget.item.color!)),
                     ),
                     const SizedBox(
                       width: 8,
                     ),
                     Text(
-                      "| Size = ${item.size}",
+                      "| Size = ${widget.item.size}",
                       style: TextStyle(
                           color: grayscale[600], fontSize: width * 0.022),
                     )
@@ -326,7 +344,7 @@ class CartItem extends StatelessWidget {
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Text(
-                          "\$${item.price}",
+                          "\$${widget.item.price}",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: width * 0.042),
@@ -336,12 +354,30 @@ class CartItem extends StatelessWidget {
                     const SizedBox(
                       width: 24,
                     ),
-                    Counter(
-                      value: item.quantity,
-                      countStyle: TextStyle(fontSize: width * 0.032),
-                      iconSize: width * 0.1,
-                      padding: 12,
-                      onChange: (value) => updateQuantity(value),
+                    StreamBuilder(
+                      stream: FirebaseFirestore.instance
+                          .collection("Cart")
+                          .doc(FirebaseAuth.instance.currentUser?.uid)
+                          .collection("Item")
+                          .doc(widget.item.uid!)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                                ConnectionState.waiting ||
+                            snapshot.hasError ||
+                            snapshot.hasData == false) {
+                          return Text("Hello");
+                        }
+                        int quantity = snapshot.data!.get("Quantity");
+
+                        return Counter(
+                          value: quantity,
+                          countStyle: TextStyle(fontSize: width * 0.032),
+                          iconSize: width * 0.1,
+                          padding: 12,
+                          onChange: (value) => updateQuantity(value),
+                        );
+                      },
                     )
                   ],
                 )

@@ -265,7 +265,9 @@ class LoginState extends State<Login> {
                 const SizedBox(
                   width: 32,
                 ),
-                const SignInWithGoogleButton(),
+                const SignInWithGoogleButton(
+                  type: GoogleSignInButtonType.icon,
+                ),
                 const SizedBox(
                   width: 32,
                 ),
